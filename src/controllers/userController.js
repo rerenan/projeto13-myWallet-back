@@ -1,37 +1,34 @@
 import db from "../db.js";
-
+import { postWalletSchema } from "../schemas.js";
 
 export async function GetWallet(req,res){
-    const { authorization } = req.headers;
-    const token = authorization?.replace('Bearer ', '');
-    if (!token) return res.sendStatus(401)
     
-
-    const session = await db.collection('sessions').findOne({ token });
-  
-    if (!session) {
-      return res.sendStatus(401);
-    }
+  const session = res.locals.session
     const user = await db.collection("users").findOne({_id: session.userId});
     if(!user) return res.sendStatus(401);
-    console.log(user.wallet)
-    res.send(user.wallet);
+    const response = {
+      name:user.name,
+      wallet: user.wallet
+    }
+    res.send(response);
 }
 
 export async function PostWallet(req,res){
-    const { authorization } = req.headers;
-    const token = authorization?.replace('Bearer ', '');
-    if (!token) return res.sendStatus(401)
-    
-
-    const session = await db.collection('sessions').findOne({ token });
+  const session = res.locals.session
+  const {error} = postWalletSchema.validate(req.body)
   
-    if (!session) {
-      return res.sendStatus(401);
-    }
+  if(error) return res.sendStatus(422)
+    
    const user = await db.collection("users").findOne({_id: session.userId});
 
    await db.collection("users").updateOne({_id: session.userId},{ $set: {wallet: [...user.wallet, req.body]}})
 
    res.sendStatus(201);
+}
+
+export async function SendStatus(req,res){
+  const session = res.locals.session
+
+  await db.collection("session").updateOne({session},{$set: {lastStatus: Date.now()}})
+  res.sendStatus(200);
 }
