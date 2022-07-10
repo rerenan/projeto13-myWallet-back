@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import db from "../db.js";
 import { postWalletSchema } from "../schemas.js";
 
@@ -16,12 +17,12 @@ export async function GetWallet(req,res){
 export async function PostWallet(req,res){
   const session = res.locals.session
   const {error} = postWalletSchema.validate(req.body)
-  
+  const operation = {... req.body, date: dayjs().format("DD/MM") } 
   if(error) return res.sendStatus(422)
     
    const user = await db.collection("users").findOne({_id: session.userId});
 
-   await db.collection("users").updateOne({_id: session.userId},{ $set: {wallet: [...user.wallet, req.body]}})
+   await db.collection("users").updateOne({_id: session.userId},{ $set: {wallet: [...user.wallet, operation]}})
 
    res.sendStatus(201);
 }
