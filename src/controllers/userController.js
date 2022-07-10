@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import 'dayjs/locale/pt-br'
+import 'dayjs/locale/pt-br.js'
 import db from "../db.js";
 import { postWalletSchema } from "../schemas.js";
 
