@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import 'dayjs/locale/pt-br.js'
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
 import db from "../db.js";
 import { postWalletSchema } from "../schemas.js";
 
@@ -18,7 +19,9 @@ export async function GetWallet(req,res){
 export async function PostWallet(req,res){
   const session = res.locals.session
   const {error} = postWalletSchema.validate(req.body)
-  const operation = {... req.body, date: dayjs().locale('pt-br').format("DD/MM") } 
+  dayjs.extend(utc)
+  dayjs.extend(timezone)
+  const operation = {... req.body, date: dayjs().tz("America/Sao_Paulo").format('DD/MM') } 
   if(error) return res.sendStatus(422)
     
    const user = await db.collection("users").findOne({_id: session.userId});
